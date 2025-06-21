@@ -1,0 +1,6 @@
+requests
+python-dotenv
+datasets
+transformers
+flask
+flask-cors
