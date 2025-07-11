@@ -1,0 +1,8 @@
+# Configuration files
+# This directory will contain system configuration files
+
+*.yaml
+*.yml
+*.json
+*.ini
+*.conf

@@ -1,0 +1,8 @@
+# Knowledge base storage
+# This directory will contain vector embeddings and knowledge documents
+
+*.faiss
+*.pkl
+vector_store/
+embeddings/
+documents/

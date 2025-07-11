@@ -1,0 +1,7 @@
+# Automation scripts and recordings
+# This directory will contain saved automation scripts
+
+*.json
+*.py
+recordings/
+scripts/

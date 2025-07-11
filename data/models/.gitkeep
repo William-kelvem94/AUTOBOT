@@ -1,0 +1,15 @@
+# Placeholder files for data directories
+# These files ensure the directories are created and tracked by git
+
+# This directory will contain:
+# - AI models from Ollama
+# - Downloaded language models
+# - Custom fine-tuned models
+
+*.bin
+*.safetensors
+*.gguf
+*.pt
+*.pth
+ollama/
+huggingface/

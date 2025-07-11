@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AUTOBOT - Assistente Inteligente Local</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+</head>
+<body>
+    <div id="autobot-container">
+        <!-- Header -->
+        <header id="main-header">
+            <div class="header-content">
+                <h1>🤖 AUTOBOT</h1>
+                <span class="subtitle">Assistente Inteligente Local</span>
+                <div class="status-indicator" id="connection-status">
+                    <span class="status-dot offline" id="status-dot"></span>
+                    <span id="status-text">Desconectado</span>
+                </div>
+            </div>
+        </header>
+
+        <div id="main-container">
+            <!-- Sidebar -->
+            <aside id="sidebar">
+                <nav id="sidebar-nav">
+                    <div class="nav-section">
+                        <h3>Menu Principal</h3>
+                        <ul>
+                            <li><a href="#" data-view="chat" class="nav-link active">💬 Chat</a></li>
+                            <li><a href="#" data-view="automations" class="nav-link">⚙️ Automações</a></li>
+                            <li><a href="#" data-view="integrations" class="nav-link">🔗 Integrações</a></li>
+                            <li><a href="#" data-view="knowledge" class="nav-link">📚 Conhecimento</a></li>
+                            <li><a href="#" data-view="settings" class="nav-link">⚙️ Configurações</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="nav-section">
+                        <h3>Automações Rápidas</h3>
+                        <div id="quick-automations">
+                            <button class="quick-action" data-action="create-automation">➕ Criar</button>
+                            <button class="quick-action" data-action="record-actions">⏺️ Gravar</button>
+                            <button class="quick-action" data-action="list-automations">📋 Listar</button>
+                        </div>
+                    </div>
+
+                    <div class="nav-section">
+                        <h3>Sistema</h3>
+                        <div id="system-info">
+                            <div class="info-item">
+                                <span class="label">CPU:</span>
+                                <span class="value" id="cpu-usage">-</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="label">Memória:</span>
+                                <span class="value" id="memory-usage">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main id="main-content">
+                <!-- Chat View -->
+                <div id="chat-view" class="view active">
+                    <div id="chat-container">
+                        <div id="chat-messages">
+                            <div class="message system-message">
+                                <div class="message-content">
+                                    <p>👋 Olá! Sou o AUTOBOT, seu assistente inteligente local.</p>
+                                    <p>Posso ajudar você com:</p>
+                                    <ul>
+                                        <li>🤖 Conversas inteligentes e respostas personalizadas</li>
+                                        <li>⚙️ Criação e execução de automações</li>
+                                        <li>🔗 Integração com sistemas como Bitrix24</li>
+                                        <li>📚 Gerenciamento de conhecimento</li>
+                                        <li>🎯 Automação de tarefas do sistema</li>
+                                    </ul>
+                                    <p>Como posso ajudar você hoje?</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="chat-input-area">
+                            <div class="input-controls">
+                                <button id="voice-btn" class="icon-btn" title="Comando por voz">🎤</button>
+                                <button id="attachment-btn" class="icon-btn" title="Anexar arquivo">📎</button>
+                            </div>
+                            <div class="input-wrapper">
+                                <textarea 
+                                    id="message-input" 
+                                    placeholder="Digite sua mensagem ou comando aqui..."
+                                    rows="1"></textarea>
+                                <button id="send-btn" class="send-btn" title="Enviar mensagem">
+                                    <span class="send-icon">▶️</span>
+                                </button>
+                            </div>
+                            <div class="quick-suggestions" id="quick-suggestions">
+                                <button class="suggestion" data-text="Crie uma automação para abrir o navegador">Automatizar navegador</button>
+                                <button class="suggestion" data-text="Liste minhas automações disponíveis">Ver automações</button>
+                                <button class="suggestion" data-text="Configure integração com Bitrix24">Configurar Bitrix24</button>
+                                <button class="suggestion" data-text="Como criar uma automação?">Como usar?</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Automations View -->
+                <div id="automations-view" class="view">
+                    <div class="view-header">
+                        <h2>⚙️ Automações</h2>
+                        <div class="view-actions">
+                            <button id="create-automation-btn" class="primary-btn">➕ Criar Nova</button>
+                            <button id="import-automation-btn" class="secondary-btn">📥 Importar</button>
+                        </div>
+                    </div>
+
+                    <div class="automation-stats">
+                        <div class="stat-card">
+                            <div class="stat-number" id="total-automations">0</div>
+                            <div class="stat-label">Total</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="active-automations">0</div>
+                            <div class="stat-label">Ativas</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="executions-today">0</div>
+                            <div class="stat-label">Execuções Hoje</div>
+                        </div>
+                    </div>
+
+                    <div class="automations-list" id="automations-list">
+                        <!-- Automations will be loaded here dynamically -->
+                    </div>
+                </div>
+
+                <!-- Integrations View -->
+                <div id="integrations-view" class="view">
+                    <div class="view-header">
+                        <h2>🔗 Integrações</h2>
+                        <button id="add-integration-btn" class="primary-btn">➕ Nova Integração</button>
+                    </div>
+
+                    <div class="integrations-grid" id="integrations-grid">
+                        <!-- Integrations will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Knowledge View -->
+                <div id="knowledge-view" class="view">
+                    <div class="view-header">
+                        <h2>📚 Base de Conhecimento</h2>
+                        <button id="add-knowledge-btn" class="primary-btn">➕ Adicionar Conhecimento</button>
+                    </div>
+
+                    <div class="knowledge-search">
+                        <input type="text" id="knowledge-search-input" placeholder="Pesquisar na base de conhecimento...">
+                        <button id="knowledge-search-btn">🔍</button>
+                    </div>
+
+                    <div class="knowledge-list" id="knowledge-list">
+                        <!-- Knowledge items will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Settings View -->
+                <div id="settings-view" class="view">
+                    <div class="view-header">
+                        <h2>⚙️ Configurações</h2>
+                    </div>
+
+                    <div class="settings-content">
+                        <div class="settings-section">
+                            <h3>IA e Modelos</h3>
+                            <div class="setting-item">
+                                <label for="default-model">Modelo Padrão:</label>
+                                <select id="default-model">
+                                    <option value="llama3">Llama 3</option>
+                                    <option value="mistral">Mistral</option>
+                                    <option value="codellama">Code Llama</option>
+                                </select>
+                            </div>
+                            <div class="setting-item">
+                                <label for="temperature">Criatividade (Temperature):</label>
+                                <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7">
+                                <span id="temperature-value">0.7</span>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>Automação</h3>
+                            <div class="setting-item">
+                                <label for="automation-delay">Delay entre ações (segundos):</label>
+                                <input type="number" id="automation-delay" min="0.1" max="10" step="0.1" value="1.0">
+                            </div>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" id="auto-save-recordings" checked>
+                                    Salvar gravações automaticamente
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>Interface</h3>
+                            <div class="setting-item">
+                                <label for="theme">Tema:</label>
+                                <select id="theme">
+                                    <option value="dark">Escuro</option>
+                                    <option value="light">Claro</option>
+                                    <option value="auto">Automático</option>
+                                </select>
+                            </div>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" id="enable-animations" checked>
+                                    Habilitar animações
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div id="modal-content" class="modal-content">
+            <!-- Modal content will be loaded dynamically -->
+        </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loading-indicator" class="loading-indicator">
+        <div class="spinner"></div>
+        <span>Processando...</span>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/js/autobot.js"></script>
+</body>
+</html>
