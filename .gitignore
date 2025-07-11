@@ -1,0 +1,41 @@
+# Logs
+IA/logs/
+*.log
+
+# Dependências
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env.local
+.env.production
+
+# AI Data
+IA/memoria_conversas/
+IA/modelos/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Docker
+docker-data/

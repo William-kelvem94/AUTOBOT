@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # Serviço Redis para cache
+  redis:
+    image: redis:7-alpine
+    container_name: autobot-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    
+  # Serviço Ollama para IA local
+  ollama:
+    image: ollama/ollama:latest
+    container_name: autobot-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    environment:
+      - OLLAMA_ORIGINS=*
+    
+  # Aplicação AUTOBOT principal
+  autobot:
+    build: .
+    container_name: autobot-api
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - REDIS_HOST=redis
+      - OLLAMA_URL=http://ollama:11434
+    depends_on:
+      - redis
+      - ollama
+    volumes:
+      - ./IA:/app/IA
+      - ./autobot:/app/autobot
+    restart: unless-stopped
+
+volumes:
+  redis_data:
+  ollama_data:
