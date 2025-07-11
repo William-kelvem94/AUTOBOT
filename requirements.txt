@@ -1,0 +1,54 @@
+# AUTOBOT Dependencies - Optimized for stability and performance
+# Core Flask and Web Framework
+flask==3.0.0
+flask-cors==4.0.0
+gunicorn==21.2.0
+Werkzeug==3.0.1
+
+# HTTP Requests and Environment
+requests==2.31.0
+urllib3==2.1.0
+python-dotenv==1.0.0
+
+# AI and Machine Learning
+transformers==4.36.0
+datasets==2.16.0
+torch==2.1.0
+chromadb==0.4.22
+sentence-transformers==2.2.2
+accelerate==0.25.0
+
+# Database and Storage
+sqlite3  # Built-in Python
+psycopg2-binary==2.9.9
+sqlalchemy==2.0.25
+
+# Data Processing and Analysis
+pandas==2.1.4
+numpy==1.24.4
+scipy==1.11.4
+
+# Async and Performance
+aiohttp==3.9.1
+asyncio  # Built-in Python
+threading  # Built-in Python
+
+# Development and Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+black==23.12.0
+flake8==6.1.0
+
+# Monitoring and Metrics
+prometheus-client==0.19.0
+psutil==5.9.6
+
+# Security and Encryption
+cryptography==41.0.8
+bcrypt==4.1.2
+
+# Additional utilities
+pytz==2023.3
+python-dateutil==2.8.2
+pyyaml==6.0.1
+pillow==10.1.0
