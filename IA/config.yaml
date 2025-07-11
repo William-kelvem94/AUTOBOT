@@ -1,0 +1,48 @@
+# AUTOBOT Configuration
+# Configuração principal do sistema de IA local
+
+ollama:
+  host: localhost
+  port: 11434
+  models:
+    - llama3.2
+    - mistral  
+    - tinyllama
+
+chromadb:
+  path: IA/memoria_conversas
+  collection_prefix: autobot
+
+redis:
+  host: localhost
+  port: 6379
+  db: 0
+
+ai:
+  embedding_model: all-MiniLM-L6-v2
+  max_context_length: 4096
+  temperature: 0.7
+  top_p: 0.9
+  top_k: 40
+
+logging:
+  level: INFO
+  file: IA/logs/autobot.log
+  max_size: 10MB
+  backup_count: 5
+
+security:
+  jwt_secret: change-in-production
+  jwt_expires_hours: 24
+  rate_limit_per_minute: 30
+
+integrations:
+  bitrix24:
+    enabled: true
+    api_url: https://api.bitrix24.com
+  ixcsoft:
+    enabled: true
+    api_url: https://api.ixcsoft.com.br
+  locaweb:
+    enabled: true
+    api_url: https://api.locaweb.com.br
