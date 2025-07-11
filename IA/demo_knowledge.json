@@ -1,0 +1,26 @@
+[
+  {
+    "id": "doc_demo_knowledge_0",
+    "text": "AUTOBOT é um sistema avançado de automação corporativa",
+    "metadata": {
+      "categoria": "definição",
+      "fonte": "documentação"
+    }
+  },
+  {
+    "id": "doc_demo_knowledge_2",
+    "text": "Integra com Bitrix24 através de webhooks para automação de tarefas",
+    "metadata": {
+      "categoria": "integração",
+      "fonte": "api"
+    }
+  },
+  {
+    "id": "doc_demo_knowledge_4",
+    "text": "Usa IA local com Ollama, ChromaDB e SentenceTransformers para processamento",
+    "metadata": {
+      "categoria": "tecnologia",
+      "fonte": "arquitetura"
+    }
+  }
+]
