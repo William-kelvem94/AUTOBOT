@@ -1,0 +1,25 @@
+# AUTOBOT - Core Requirements (Simplified for stability)
+# Framework Web
+flask>=3.0.0
+flask-cors>=4.0.0
+gunicorn>=21.0.0
+
+# Essential APIs e Integrações
+requests>=2.31.0
+python-dotenv>=1.0.0
+beautifulsoup4>=4.12.0
+psutil>=5.9.0
+
+# Data Processing (essential only)
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Development and Testing
+pytest>=7.0.0
+pytest-flask>=1.2.0
+
+# Optional AI packages (install separately if needed)
+# ollama>=0.1.7
+# transformers>=4.30.0
+# torch>=2.0.0
+# selenium>=4.15.0
