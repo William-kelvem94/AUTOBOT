@@ -1,0 +1,49 @@
+# docker-compose.ia.yml - Adiciona serviços de IA ao sistema existente
+version: '3.8'
+services:
+  # Serviços adicionais para IA local (complementa setup existente)
+  
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./IA/modelos_personalizados:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    
+  chromadb:
+    image: chromadb/chroma:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./IA/memoria_vetorial:/chroma/chroma
+    environment:
+      - CHROMA_SERVER_HOST=0.0.0.0
+      - CHROMA_SERVER_HTTP_PORT=8000
+    restart: unless-stopped
+    
+  # Opcional: n8n para workflows visuais
+  n8n:
+    image: n8nio/n8n:latest
+    ports:
+      - "5678:5678"
+    volumes:
+      - ./IA/workflows:/home/node/.n8n
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=autobot
+      - N8N_BASIC_AUTH_PASSWORD=autobot123
+    restart: unless-stopped
+
+# Volumes para persistência
+volumes:
+  ollama_models:
+  chroma_data:
+  n8n_data:

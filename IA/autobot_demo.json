@@ -1,0 +1,22 @@
+[
+  {
+    "id": "doc_autobot_demo_0",
+    "text": "AUTOBOT é um sistema de automação corporativa avançado",
+    "metadata": {}
+  },
+  {
+    "id": "doc_autobot_demo_2",
+    "text": "Integra com Bitrix24, IXCSOFT, Locaweb, Fluctus, Newave, Uzera, PlayHub",
+    "metadata": {}
+  },
+  {
+    "id": "doc_autobot_demo_4",
+    "text": "Usa IA local com Ollama, ChromaDB e SentenceTransformers",
+    "metadata": {}
+  },
+  {
+    "id": "doc_autobot_demo_6",
+    "text": "Permite automação de tarefas usando PyAutoGUI e Selenium",
+    "metadata": {}
+  }
+]

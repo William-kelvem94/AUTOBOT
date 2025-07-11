@@ -1,0 +1,8 @@
+# Dependências específicas para o sistema de IA local
+ollama==0.1.7
+chromadb==0.4.22
+sentence-transformers==2.2.2
+torch>=1.9.0
+numpy>=1.21.0
+transformers>=4.20.0
+flask>=2.0.0
