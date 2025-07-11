@@ -1,0 +1,331 @@
+version: '3.8'
+
+services:
+  # AUTOBOT API Principal
+  autobot-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - INSTALL_TYPE=enterprise
+    ports:
+      - "5000:5000"
+    environment:
+      - AUTOBOT_CONFIG_PATH=/app/config/main.yaml
+      - AUTOBOT_ENV=production
+      - OLLAMA_HOST=http://ollama:11434
+      - REDIS_URL=redis://redis:6379/0
+      - POSTGRES_URL=postgresql://autobot:autobot123@postgres:5432/autobot
+    volumes:
+      - ./config:/app/config:ro
+      - ./data:/app/data
+      - ./logs:/app/logs
+    depends_on:
+      - postgres
+      - redis
+      - ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - autobot-network
+
+  # Dashboard de Monitoramento
+  autobot-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m IA.dashboard.monitor
+    ports:
+      - "8080:8080"
+    environment:
+      - AUTOBOT_CONFIG_PATH=/app/config/dashboard.yaml
+      - AUTOBOT_ENV=production
+    volumes:
+      - ./config:/app/config:ro
+      - ./data:/app/data
+    depends_on:
+      - autobot-api
+      - redis
+    restart: unless-stopped
+    networks:
+      - autobot-network
+
+  # Ollama - Servidor de IA Local
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_ORIGINS=*
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    networks:
+      - autobot-network
+
+  # PostgreSQL - Banco Principal
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=autobot
+      - POSTGRES_USER=autobot
+      - POSTGRES_PASSWORD=autobot123
+      - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./config/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U autobot -d autobot"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - autobot-network
+
+  # Redis - Cache e Sessões
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 1gb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - autobot-network
+
+  # Nginx - Proxy Reverso
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./config/nginx/ssl:/etc/nginx/ssl:ro
+      - nginx-logs:/var/log/nginx
+    depends_on:
+      - autobot-api
+      - autobot-dashboard
+    restart: unless-stopped
+    networks:
+      - autobot-network
+
+  # Prometheus - Métricas
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    restart: unless-stopped
+    networks:
+      - autobot-network
+
+  # Grafana - Dashboards
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./config/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - autobot-network
+
+  # ElasticSearch - Logs
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    restart: unless-stopped
+    networks:
+      - autobot-network
+
+  # Kibana - Análise de Logs
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+    networks:
+      - autobot-network
+
+  # Logstash - Processamento de Logs
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.11.0
+    ports:
+      - "5044:5044"
+    volumes:
+      - ./config/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+      - ./logs:/usr/share/logstash/logs:ro
+    environment:
+      - LS_JAVA_OPTS=-Xmx1g -Xms1g
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+    networks:
+      - autobot-network
+
+  # ChromaDB - Base Vetorial
+  chromadb:
+    image: ghcr.io/chroma-core/chroma:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - chromadb-data:/chroma/chroma
+    environment:
+      - CHROMA_HOST_PROVIDER=chromadb.host.docker.DockerHost
+      - CHROMA_HOST_AUTH_PROVIDER=chromadb.auth.basic.BasicAuthenticationServerProvider
+      - CHROMA_SERVER_AUTH_CREDENTIALS_FILE=/chroma/auth/credentials
+    restart: unless-stopped
+    networks:
+      - autobot-network
+
+  # React Frontend
+  autobot-frontend:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000
+      - REACT_APP_DASHBOARD_URL=http://localhost:8080
+    volumes:
+      - ./web/src:/app/src:ro
+    depends_on:
+      - autobot-api
+    restart: unless-stopped
+    networks:
+      - autobot-network
+
+  # Worker de Background
+  autobot-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m autobot.worker
+    environment:
+      - AUTOBOT_CONFIG_PATH=/app/config/main.yaml
+      - AUTOBOT_ENV=production
+      - REDIS_URL=redis://redis:6379/1
+    volumes:
+      - ./config:/app/config:ro
+      - ./data:/app/data
+      - ./logs:/app/logs
+    depends_on:
+      - redis
+      - postgres
+    restart: unless-stopped
+    networks:
+      - autobot-network
+
+  # Backup Automático
+  autobot-backup:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m IA.backup.manager --schedule
+    environment:
+      - AUTOBOT_CONFIG_PATH=/app/config/backup.yaml
+    volumes:
+      - ./config:/app/config:ro
+      - ./data:/app/data
+      - ./backups:/app/backups
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - autobot-network
+
+  # Watchtower - Auto Update
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=3600
+      - WATCHTOWER_INCLUDE_STOPPED=true
+    command: --debug
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+    driver: local
+  redis-data:
+    driver: local
+  ollama-data:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  elasticsearch-data:
+    driver: local
+  chromadb-data:
+    driver: local
+  nginx-logs:
+    driver: local
+
+networks:
+  autobot-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# Healthcheck global
+x-healthcheck-config: &healthcheck-config
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 40s
